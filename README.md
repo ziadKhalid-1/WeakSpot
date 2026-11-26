@@ -4,7 +4,7 @@
 
 WeakSpot is a study tool for university students. Instead of re-reading a whole chapter, you get a quick quiz built from your own slides, and a short list of the weak parts to review, with the slide numbers to go back to.
 
-> Arabic working title: اعرف نقاط ضعفك
+> Arabic working title: معيار
 
 ## The problem
 

@@ -1,4 +1,4 @@
-# DESIGN.md — اعرف نقاط ضعفك
+# DESIGN.md — معيار
 
 Single source of truth for every screen. If a value is not in this file, it is not in the design.
 Source: the approved "ورق هادي" direction, its style sheet artboard, and the full-app prototype (`Proto-App`).

@@ -1,4 +1,4 @@
-# HANDOFF.md: اعرف نقاط ضعفك
+# HANDOFF.md: معيار
 
 For a developer building with Claude Code. Read together with **DESIGN.md** (look and components) and **mock.json** (sample data).
 Source: the approved screens in the design canvas (`Proto-App` full flow, plus Upload / Quiz / Result screens).

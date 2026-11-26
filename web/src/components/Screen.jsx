@@ -12,7 +12,7 @@ export default function Screen({ header, actions, children }) {
 export function AppHeader() {
   return (
     <header className="app-header">
-      <p className="t-action">اعرف نقاط ضعفك</p>
+      <p className="t-action">معيار</p>
     </header>
   );
 }
