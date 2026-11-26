@@ -101,9 +101,10 @@ async function post(url, headers, body, timeoutMs, providerName) {
 // (404) is skipped. Only when every model is overloaded does the call fail, with code 'busy'.
 //
 // Chain: the configured model first, then GEMINI_FALLBACK_MODELS (comma separated) or the
-// defaults below. The lite model is lighter on quality but is often free when the others are busy. gemini-2.5-flash is last because older keys can still use it; new keys get
-// 404 for it and it is skipped.
-const GEMINI_FALLBACKS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'];
+// defaults below. The lite models come first because they usually still answer when the full
+// Flash models are overloaded (their questions can be a little simpler). gemini-2.5-flash and
+// gemini-2.0-flash are not in the chain: new keys get 404 for them.
+const GEMINI_FALLBACKS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'];
 const GEMINI_ATTEMPTS = 3;
 const GEMINI_BACKOFF_MS = [2000, 4000, 8000];
 // After this long, no more waiting: each remaining model gets one quick try. Vercel stops the function at 60s
@@ -123,6 +124,7 @@ async function callGemini(p, opts) {
   const started = Date.now();
   const chain = geminiChain(p.model);
   let lastError = null;
+  const tried = []; // "model: HTTP 503" per model, for the final error message
   for (const [i, model] of chain.entries()) {
     for (let attempt = 1; attempt <= GEMINI_ATTEMPTS; attempt++) {
       try {
@@ -131,6 +133,7 @@ async function callGemini(p, opts) {
         return text;
       } catch (e) {
         lastError = e;
+        tried[i] = `${model}: ${e.details?.status ? `HTTP ${e.details.status}` : e.code}`;
         if (isMissingModel(e) && i > 0) {
           console.warn(`[ai] gemini fallback ${model} not available (404), skipping`);
           break; // next model
@@ -149,7 +152,7 @@ async function callGemini(p, opts) {
     }
   }
   if (isOverloaded(lastError) || isMissingModel(lastError)) {
-    throw new AiError('busy', `gemini overloaded on every model (${chain.join(', ')}): ${lastError.message}`, lastError.details);
+    throw new AiError('busy', `gemini overloaded on every model (${tried.filter(Boolean).join(', ')})`, lastError.details);
   }
   throw lastError;
 }
