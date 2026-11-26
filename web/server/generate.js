@@ -68,7 +68,7 @@ export default async function generateHandler(req, res) {
   const configProblem = supabaseConfigProblem() || (getProvider() ? null : 'no AI key in env');
   if (configProblem) {
     console.error(`[api/generate] not configured: ${configProblem}`);
-    return sendJson(res, 500, { error: 'not_configured', message: MESSAGES.not_configured });
+    return sendJson(res, 500, { error: 'not_configured', message: withDetail(MESSAGES.not_configured, configProblem) });
   }
 
   // 2) Body + session id.
@@ -84,18 +84,25 @@ export default async function generateHandler(req, res) {
       pdf = raw;
     }
   } catch (e) {
+    console.error('[api/generate] could not read request body', e);
     const code = e instanceof HttpError ? e.code : 'bad_request';
     if (UUID.test(sessionId) && code === 'too_large') await markFailed(sessionId, MESSAGES.too_large);
     return sendJson(res, code === 'too_large' ? 413 : 400, { error: code, message: MESSAGES[code] ?? MESSAGES.ai });
   }
   if (!UUID.test(sessionId)) return sendJson(res, 400, { error: 'bad_session' });
 
-  const db = admin();
+  let db;
+  try {
+    db = admin();
+  } catch (e) {
+    console.error('[api/generate] could not create Supabase client', e);
+    return sendJson(res, 500, { error: 'not_configured', message: withDetail(MESSAGES.not_configured, describeError(e)) });
+  }
   const { data: session, error: sessionError } = await db
     .from('sessions').select('id, status').eq('id', sessionId).maybeSingle();
   if (sessionError) {
     console.error('[api/generate] session lookup failed', sessionError);
-    return sendJson(res, 500, { error: 'db', message: MESSAGES.save });
+    return sendJson(res, 500, { error: 'db', message: withDetail(MESSAGES.save, describeError(sessionError)) });
   }
   if (!session) return sendJson(res, 404, { error: 'no_session' });
   if (session.status !== 'preparing') return sendJson(res, 409, { error: 'not_preparing', status: session.status });
@@ -126,8 +133,9 @@ export default async function generateHandler(req, res) {
     send({ stage: 'done', questionCount: quiz.questions.length, partCount: quiz.parts.length, slideCount: quiz.slideCount });
   } catch (e) {
     const code = e instanceof AiError ? (e.code === 'timeout' ? 'timeout' : 'ai') : e?.code in MESSAGES ? e.code : 'save';
-    console.error(`[api/generate] failed (${code})`, e?.message, e?.details ?? '');
-    const message = MESSAGES[code] ?? MESSAGES.ai;
+    console.error(`[api/generate] failed (${code})`, e, e?.details ?? '');
+    // The Arabic reason, then the exact technical cause on its own line (shown under it on screen).
+    const message = withDetail(MESSAGES[code] ?? MESSAGES.ai, describeError(e));
     await cleanUp(db, sessionId);
     await markFailed(sessionId, message);
     send({ stage: 'failed', error: code, message });
@@ -239,6 +247,29 @@ async function cleanUp(db, sessionId) {
   const { error } = await db.from('parts').delete().eq('session_id', sessionId); // questions cascade
   if (error) console.error('[api/generate] clean-up failed', error);
 }
+
+// The exact cause of a failure as one line of text, e.g.
+//   "gemini HTTP 404: models/gemini-x is not found" or "save: 42501 permission denied for table parts".
+// Anything that looks like a key is masked, because this text is saved and shown to the user.
+function describeError(e) {
+  if (!e) return '';
+  const parts = [e.message || String(e)];
+  const d = e.details;
+  if (d && typeof d === 'object') parts.push([d.code, d.message, d.details, d.hint].filter(Boolean).join(' '));
+  else if (d && typeof d !== 'object') parts.push(String(d));
+  return parts
+    .filter(Boolean)
+    .join(' | ')
+    .replace(/(AIza[0-9A-Za-z_-]{10,}|sb_secret_[0-9A-Za-z_-]+|sk-[0-9A-Za-z_-]{10,}|eyJ[0-9A-Za-z._-]{20,})/g, '[hidden]')
+    .replace(/([?&]key=)[^&\s]+/gi, '$1[hidden]')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 500);
+}
+
+// Arabic message + "\n" + technical detail. The frontend shows the first line as the reason and
+// the rest underneath, left-to-right.
+const withDetail = (message, detail) => (detail ? `${message}\n${detail}` : message);
 
 async function markFailed(sessionId, message) {
   try {

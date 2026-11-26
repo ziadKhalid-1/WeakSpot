@@ -70,6 +70,7 @@ async function post(url, headers, body, timeoutMs, providerName) {
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (e) {
+    console.error(`[ai] ${providerName} request failed`, e);
     if (e?.name === 'TimeoutError' || e?.name === 'AbortError') throw new AiError('timeout', `${providerName} timed out`);
     throw new AiError('http', `${providerName} request failed: ${e?.message}`);
   }
@@ -82,6 +83,7 @@ async function post(url, headers, body, timeoutMs, providerName) {
   }
   if (!res.ok) {
     const message = data?.error?.message || raw.slice(0, 300);
+    console.error(`[ai] ${providerName} HTTP ${res.status}`, raw.slice(0, 2000));
     throw new AiError('http', `${providerName} HTTP ${res.status}: ${message}`, { status: res.status });
   }
   return data;

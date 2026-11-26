@@ -138,10 +138,14 @@ export default function Preparing({ deps = realDeps }) {
     ) : (
       <Button onClick={chooseAnother} disabled={busy}>اختر ملف ثاني</Button>
     );
+    // The server sends "<Arabic reason>\n<technical detail>": reason first, exact cause under it.
+    const [reason, ...rest] = String(actionError ?? failedMessage).split('\n');
+    const detail = actionError ? '' : rest.join(' ').trim();
     return (
       <Screen header={<AppHeader />} actions={actions}>
         <PageHeading title="ما قدرنا نجهّز أسئلتك" />
-        <p role="alert" className="t-body">{actionError ?? failedMessage}</p>
+        <p role="alert" className="t-body">{reason}</p>
+        {detail && <p className="t-label c-stone" dir="ltr">{detail}</p>}
         {session?.fileName && <FileCard fileName={session.fileName} />}
       </Screen>
     );
