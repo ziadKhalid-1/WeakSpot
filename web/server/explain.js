@@ -22,6 +22,7 @@ const MESSAGES = {
   too_long: 'سؤالك طويل شوي. اختصره وحاول مرة ثانية.',
   not_found: 'ما لقينا هذا السؤال. يمكن انحذفت الجلسة.',
   not_answered: 'جاوب على السؤال أول، بعدين نشرح لك.',
+  busy: 'خوادم الذكاء الاصطناعي مزدحمة حالياً، حاول مرة ثانية بعد قليل.',
   ai: 'ما قدرنا نجهّز الشرح الحين. حاول مرة ثانية.',
 };
 
@@ -81,7 +82,8 @@ export default async function explainHandler(req, res) {
     const answer = await askText({ system: SYSTEM, prompt: `${context}\n\n${task}` });
     return sendJson(res, 200, { answer });
   } catch (e) {
-    console.error('[api/explain] AI failed', e?.message, e?.details ?? '');
-    return sendJson(res, 502, { error: 'ai', message: MESSAGES.ai });
+    console.error('[api/explain] AI failed', e);
+    const code = e?.code === 'busy' ? 'busy' : 'ai';
+    return sendJson(res, code === 'busy' ? 503 : 502, { error: code, message: MESSAGES[code] });
   }
 }

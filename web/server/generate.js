@@ -24,6 +24,7 @@ const MESSAGES = {
   empty: 'الملف فاضي. اختر ملف السلايدات مرة ثانية.',
   no_content: 'ما لقينا كلام نقدر نطلّع منه أسئلة. تأكد إن السلايدات فيها نص مو صور بس.',
   ai: 'ما قدرنا نطلّع أسئلة من الملف هذا. حاول مرة ثانية.',
+  busy: 'خوادم الذكاء الاصطناعي مزدحمة حالياً، حاول مرة ثانية بعد قليل.',
   timeout: 'تأخر تجهيز الأسئلة أكثر من اللازم. حاول مرة ثانية، أو جرّب ملف أصغر.',
   save: 'صار خلل وإحنا نحفظ الأسئلة. حاول مرة ثانية.',
 };
@@ -132,7 +133,7 @@ export default async function generateHandler(req, res) {
     await save(db, sessionId, quiz);
     send({ stage: 'done', questionCount: quiz.questions.length, partCount: quiz.parts.length, slideCount: quiz.slideCount });
   } catch (e) {
-    const code = e instanceof AiError ? (e.code === 'timeout' ? 'timeout' : 'ai') : e?.code in MESSAGES ? e.code : 'save';
+    const code = e instanceof AiError ? (e.code === 'timeout' || e.code === 'busy' ? e.code : 'ai') : e?.code in MESSAGES ? e.code : 'save';
     console.error(`[api/generate] failed (${code})`, e, e?.details ?? '');
     // The Arabic reason, then the exact technical cause on its own line (shown under it on screen).
     const message = withDetail(MESSAGES[code] ?? MESSAGES.ai, describeError(e));

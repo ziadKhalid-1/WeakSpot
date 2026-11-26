@@ -5,13 +5,14 @@
 //   OPENAI_API_KEY    -> OpenAI          (model: OPENAI_MODEL,    default gpt-4.1)
 //   ANTHROPIC_API_KEY -> Anthropic Claude (model: ANTHROPIC_MODEL, default claude-sonnet-5-5)
 // AI_MODEL overrides the model for whichever provider is picked.
+// Gemini retries 503/429 with backoff and falls back to other models (see callGemini).
 //
 // All three read PDFs natively (text + page images, page by page), so no PDF parser is needed.
 
 export class AiError extends Error {
   constructor(code, message, details) {
     super(message || code);
-    this.code = code; // 'not_configured' | 'http' | 'timeout' | 'empty' | 'parse' | 'truncated' | 'blocked'
+    this.code = code; // 'not_configured' | 'http' | 'busy' | 'timeout' | 'empty' | 'parse' | 'truncated' | 'blocked'
     this.details = details;
   }
 }
@@ -84,12 +85,76 @@ async function post(url, headers, body, timeoutMs, providerName) {
   if (!res.ok) {
     const message = data?.error?.message || raw.slice(0, 300);
     console.error(`[ai] ${providerName} HTTP ${res.status}`, raw.slice(0, 2000));
-    throw new AiError('http', `${providerName} HTTP ${res.status}: ${message}`, { status: res.status });
+    // Google sends "retry in Ns" (RetryInfo). A long one means a daily quota, not a short spike.
+    const retryDelay = data?.error?.details?.find((d) => String(d?.['@type']).endsWith('RetryInfo'))?.retryDelay;
+    const retryAfterSec = retryDelay ? parseFloat(retryDelay) : undefined;
+    throw new AiError('http', `${providerName} HTTP ${res.status}: ${message}`, { status: res.status, retryAfterSec });
   }
   return data;
 }
 
-async function callGemini(p, { system, prompt, pdf, json, timeoutMs, maxTokens }) {
+// ---- Gemini: retry + model fallback ---------------------------------------------------------
+//
+// Gemini often answers 503 ("high demand") or 429 (rate limit) for a few seconds at a time.
+// Each model gets up to 3 attempts with a growing wait in between (2s, then 4s). If it is still
+// overloaded, the next model in the chain is tried. A model that does not exist for this key
+// (404) is skipped. Only when every model is overloaded does the call fail, with code 'busy'.
+//
+// Chain: the configured model first, then GEMINI_FALLBACK_MODELS (comma separated) or the
+// defaults below. The lite model is lighter on quality but is often free when the others are busy. gemini-2.5-flash is last because older keys can still use it; new keys get
+// 404 for it and it is skipped.
+const GEMINI_FALLBACKS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'];
+const GEMINI_ATTEMPTS = 3;
+const GEMINI_BACKOFF_MS = [2000, 4000, 8000];
+// After this long, no more waiting: each remaining model gets one quick try. Vercel stops the function at 60s
+// (vercel.json), and the real call still needs time to finish after that.
+const GEMINI_RETRY_BUDGET_MS = 25_000;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const isOverloaded = (e) => e instanceof AiError && e.code === 'http' && [429, 503].includes(e.details?.status);
+const isMissingModel = (e) => e instanceof AiError && e.code === 'http' && e.details?.status === 404;
+
+function geminiChain(primary) {
+  const extra = (process.env.GEMINI_FALLBACK_MODELS ?? '').split(',').map((m) => m.trim()).filter(Boolean);
+  return [...new Set([primary, ...(extra.length ? extra : GEMINI_FALLBACKS)])];
+}
+
+async function callGemini(p, opts) {
+  const started = Date.now();
+  const chain = geminiChain(p.model);
+  let lastError = null;
+  for (const [i, model] of chain.entries()) {
+    for (let attempt = 1; attempt <= GEMINI_ATTEMPTS; attempt++) {
+      try {
+        const text = await callGeminiOnce({ ...p, model }, opts);
+        if (model !== p.model || attempt > 1) console.warn(`[ai] gemini ok with ${model} (attempt ${attempt})`);
+        return text;
+      } catch (e) {
+        lastError = e;
+        if (isMissingModel(e) && i > 0) {
+          console.warn(`[ai] gemini fallback ${model} not available (404), skipping`);
+          break; // next model
+        }
+        if (!isOverloaded(e)) throw e; // a real error (bad key, bad request, timeout...): no retry
+        if (e.details.retryAfterSec > 30) {
+          console.warn(`[ai] gemini ${model} quota used up (retry in ${Math.round(e.details.retryAfterSec)}s), next model`);
+          break; // e.g. the free tier's daily limit: waiting a few seconds will not help
+        }
+        const wait = GEMINI_BACKOFF_MS[attempt - 1];
+        const outOfTime = Date.now() - started + wait > GEMINI_RETRY_BUDGET_MS;
+        console.warn(`[ai] gemini ${model} overloaded (HTTP ${e.details.status}), attempt ${attempt}/${GEMINI_ATTEMPTS}`);
+        if (attempt === GEMINI_ATTEMPTS || outOfTime) break; // next model, no wait
+        await sleep(wait);
+      }
+    }
+  }
+  if (isOverloaded(lastError) || isMissingModel(lastError)) {
+    throw new AiError('busy', `gemini overloaded on every model (${chain.join(', ')}): ${lastError.message}`, lastError.details);
+  }
+  throw lastError;
+}
+
+async function callGeminiOnce(p, { system, prompt, pdf, json, timeoutMs, maxTokens }) {
   const parts = [];
   if (pdf) parts.push({ inline_data: { mime_type: 'application/pdf', data: pdf.toString('base64') } });
   parts.push({ text: prompt });
