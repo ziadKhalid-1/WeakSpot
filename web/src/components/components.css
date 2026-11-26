@@ -1,0 +1,427 @@
+/* Shared components. Tokens only (see tokens.css). Logical properties only. */
+
+/* ---------- Screen: paper ground, padding 24/20/32, primary action pinned to the bottom ---------- */
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-block-size: 100dvh;
+  max-inline-size: var(--app-max);
+  margin-inline: auto;
+  padding-block: var(--space-5) var(--space-6);
+  padding-inline: var(--screen-pad-inline);
+  background: var(--color-paper);
+  animation: screen-enter var(--dur-enter) var(--ease-enter);
+}
+.screen__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  flex: 1;
+}
+.screen__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-tight);
+}
+/* Enters from the inline-end side: left in RTL, so the shift is negative there. */
+@keyframes screen-enter {
+  from { opacity: 0; transform: translateX(calc(var(--enter-shift) * var(--dir-sign, 1))); }
+  to { opacity: 1; transform: none; }
+}
+[dir='rtl'] { --dir-sign: -1; }
+[dir='ltr'] { --dir-sign: 1; }
+
+/* ---------- App header ---------- */
+.app-header {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--size-tap);
+  color: var(--color-ink);
+}
+
+/* ---------- Page heading ---------- */
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* ---------- Button ---------- */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  min-block-size: var(--size-button);
+  padding-inline: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn--primary {
+  background: var(--color-olive);
+  color: var(--color-surface);
+}
+.btn--primary:active { background: var(--color-olive-pressed); }
+.btn--primary:disabled {
+  background: var(--color-sand);
+  color: var(--color-stone);
+  cursor: not-allowed;
+}
+.btn--secondary {
+  background: transparent;
+  border: var(--border-selected);
+  color: var(--color-olive);
+}
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--color-surface);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+/* ---------- Icon ---------- */
+.icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon--accent { color: var(--color-olive); }
+
+/* ---------- Upload box ---------- */
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex: 1;
+  inline-size: 100%;
+  padding: var(--space-5) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-upload);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  text-align: center;
+  cursor: pointer;
+}
+.upload-box--dragging {
+  background: var(--color-olive-tint);
+  border-color: var(--color-olive);
+}
+.upload-box__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.upload-box:disabled { cursor: default; }
+
+.upload-box__name {
+  display: block;
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.upload-box__text { max-inline-size: 100%; }
+
+/* ---------- Secondary button: disabled (DESIGN.md [pending], uses the disabled primary's tokens) ---------- */
+.btn--secondary:disabled {
+  border-color: var(--color-sand);
+  color: var(--color-stone);
+  cursor: not-allowed;
+}
+.btn--secondary:active:not(:disabled) { border-color: var(--color-olive-pressed); color: var(--color-olive-pressed); }
+.btn--inline { inline-size: auto; flex: none; }
+
+/* ---------- Icon button: 44 × 44, no background ---------- */
+.icon-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--size-icon-button);
+  block-size: var(--size-icon-button);
+  padding: 0;
+  margin-inline-end: calc(var(--space-3) * -1); /* optical: the ✕ glyph lines up with the content edge */
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+/* ---------- Progress bar ---------- */
+.progress {
+  block-size: var(--size-progress);
+  background: var(--color-sand);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.progress__fill {
+  block-size: 100%;
+  background: var(--color-olive);
+  border-radius: var(--radius-full);
+  transition: inline-size var(--dur-progress) ease;
+}
+
+/* ---------- Badge ---------- */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-tight);
+  background: var(--color-olive-tint);
+  color: var(--color-olive);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- File card ---------- */
+.file-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.file-card__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+.file-card__name {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Success mark: 56px olive-tint circle with an olive check ---------- */
+.success-mark {
+  display: grid;
+  place-items: center;
+  inline-size: var(--icon-hero);
+  block-size: var(--icon-hero);
+  border-radius: var(--radius-full);
+  background: var(--color-olive-tint);
+  color: var(--color-olive);
+}
+
+/* ---------- Quiz header: counter + ✕, then the progress bar ---------- */
+.quiz-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.quiz-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: var(--size-tap);
+}
+
+/* ---------- Question: next-question exit motion ---------- */
+.question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  animation: screen-enter var(--dur-enter) var(--ease-enter);
+}
+.question--leaving {
+  opacity: 0;
+  transform: translateX(calc(var(--out-shift) * var(--dir-sign, 1)));
+  transition: opacity var(--dur-out) ease, transform var(--dur-out) ease;
+}
+
+/* ---------- Answer options (radio) ---------- */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-tight);
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  min-block-size: var(--size-option);
+  padding-block: var(--space-3);
+  padding-inline: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--dur-select) ease, border-color var(--dur-select) ease;
+}
+.option__radio {
+  flex: none;
+  inline-size: var(--size-radio);
+  block-size: var(--size-radio);
+  border: 1.5px solid var(--color-stone);
+  border-radius: var(--radius-full);
+  transition: border var(--dur-select) ease;
+}
+.option__text { flex: 1; min-inline-size: 0; }
+.option__mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+}
+.option[aria-checked='true'] {
+  background: var(--color-olive-tint);
+  border: var(--border-selected);
+  font-weight: var(--text-body-weight-selected);
+}
+.option[aria-checked='true'] .option__radio { border: 6px solid var(--color-olive); }
+.option[aria-disabled='true'] { cursor: default; }
+/* Wrong answer: no new colour (none is approved in DESIGN.md). Paper ground, stone outline, ✕ + text. */
+.option--wrong[aria-checked='true'] {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-stone);
+}
+.option--wrong[aria-checked='true'] .option__radio { border: 6px solid var(--color-stone); }
+.option--wrong .option__mark { color: var(--color-ink); }
+.option--right .option__mark { color: var(--color-olive); }
+
+/* ---------- Feedback card (after answering) ---------- */
+.feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-tight);
+  animation: fade-in var(--dur-fade) ease-out both;
+}
+.feedback__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.feedback__ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-default);
+}
+.feedback__row {
+  display: flex;
+  gap: var(--space-2);
+}
+.feedback__reply {
+  padding-block-start: var(--space-3);
+  border-block-start: var(--border-default);
+  white-space: pre-line;
+}
+
+/* ---------- Input ---------- */
+.input {
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: var(--size-button);
+  padding-inline: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
+}
+.input::placeholder { color: var(--color-stone); }
+.input:focus-visible { outline: 2px solid var(--color-olive); outline-offset: 0; border-color: var(--color-olive); }
+
+/* ---------- Result ---------- */
+.result-cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.weak-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-tight);
+  animation: fade-in var(--dur-fade) ease-out both;
+}
+.weak-card__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.weak-card__score { flex: none; }
+
+.known {
+  border-block-start: var(--border-default);
+}
+.known__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  min-block-size: var(--size-row);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--color-ink);
+  text-align: start;
+  cursor: pointer;
+}
+.known__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: fade-in var(--dur-fade) ease-out both;
+}
+.known__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: var(--size-row);
+  padding-block: var(--space-2);
+  border-block-end: var(--border-default);
+}
+.known__row > span:last-child { flex: none; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- Link button (inline text action) ---------- */
+.link-button {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--color-olive);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button:hover,
+.link-button:active { color: var(--color-olive-pressed); }
+
+/* ---------- Result header: «نتيجتك» + ✕ ---------- */
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: var(--size-tap);
+}

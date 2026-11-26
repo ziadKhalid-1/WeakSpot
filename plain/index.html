@@ -1,0 +1,35 @@
+<!doctype html>
+<!--
+  Plan B: no Node, no npm install, no internet needed.
+  Double-click this file and it opens in the browser. Same three screens as web/, in plain HTML + JS.
+  When Node works again, move to web/ (that is what Day 3 builds on).
+-->
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>مشروعي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../web/src/tokens.css" />
+    <link rel="stylesheet" href="../web/src/base.css" />
+  </head>
+  <body>
+    <div class="starter-banner">هذا هيكل رمادي عن قصد. الشكل يجي من DESIGN.md حقك. (نسخة بدون تثبيت)</div>
+    <div class="shell">
+      <nav class="nav" aria-label="الشاشات">
+        <a href="#/">الرئيسية</a>
+        <a href="#/detail/1">التفاصيل</a>
+        <a href="#/action">الفعل الرئيسي</a>
+      </nav>
+      <main id="screen"></main>
+    </div>
+    <!-- Classic scripts (not modules) so a double-click on file:// works. mock.js defines window.MOCK. -->
+    <script src="mock.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

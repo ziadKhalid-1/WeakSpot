@@ -1,0 +1,73 @@
+/*
+  base.css: reset + type helpers. Logical properties only; no left/right.
+  Flex rows follow dir="rtl" by themselves: never reverse them by hand.
+*/
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-leading);
+  letter-spacing: 0;
+}
+
+h1, h2, h3, p { margin: 0; }
+button { font: inherit; color: inherit; letter-spacing: 0; }
+* { box-shadow: none; }
+
+:focus-visible { outline: 2px solid var(--color-olive); outline-offset: 2px; }
+
+/* Type scale: 4 sizes only */
+.t-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-leading);
+}
+.t-action {
+  font-family: var(--font-display);
+  font-size: var(--text-action-size);
+  font-weight: var(--text-action-weight);
+  line-height: var(--text-action-leading);
+}
+.t-body {
+  font-family: var(--font-text);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-leading);
+}
+.t-label {
+  font-family: var(--font-text);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: var(--text-label-leading);
+}
+.c-stone { color: var(--color-stone); }
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Directional icons (back/forward arrows) flip in RTL. ✕, ✓, documents, chevron up/down do not. */
+[dir='rtl'] .icon-directional { transform: scaleX(-1); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

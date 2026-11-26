@@ -1,0 +1,85 @@
+/*
+  tokens.css: the ONLY place colours, fonts, sizes and spacing are defined.
+  Mirrors DESIGN.md ("ورق هادي"). Every other file uses var(--...). No hex values anywhere else.
+*/
+:root {
+  /* 2. Colours: exactly 7 tokens + 1 pressed variant */
+  --color-paper: #F7F4EE;
+  --color-surface: #FFFFFF;
+  --color-ink: #1F2328;
+  --color-stone: #6B6760;
+  --color-sand: #DDD6CA;
+  --color-olive: #2F6F5E;
+  --color-olive-pressed: #245849;
+  --color-olive-tint: #E6F0EC;
+
+  /* 3. Typography: 2 fonts, 4 sizes */
+  --font-display: 'Readex Pro', sans-serif;
+  --font-text: 'Noto Sans Arabic', sans-serif;
+
+  --text-title-size: 22px;
+  --text-title-weight: 600;
+  --text-title-leading: 1.6;
+
+  --text-action-size: 18px;
+  --text-action-weight: 600;
+  --text-action-leading: 1.4;
+
+  --text-body-size: 16px;
+  --text-body-weight: 400;
+  --text-body-weight-selected: 500;
+  --text-body-leading: 1.7;
+
+  --text-label-size: 14px;
+  --text-label-weight: 500;
+  --text-label-leading: 1.6;
+
+  /* 4. Spacing scale: 4 · 8 · 12 · 16 · 24 · 32 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  /* Documented off-scale exception (options gap, card inner gap, stacked buttons, badge inline padding) */
+  --space-tight: 10px;
+  /* Screen padding (DESIGN.md §4): block-start 24, inline 20, block-end 32 */
+  --screen-pad-inline: 20px;
+
+  /* Sizes */
+  --size-button: 56px;
+  --size-option: 56px;
+  --size-row: 48px;
+  --size-icon-button: 44px;
+  --size-progress: 6px;
+  --size-tap: 44px;
+  --icon-hero: 56px;
+  --icon-file: 28px;
+  --icon-close: 22px;
+  --icon-chevron: 20px;
+  --icon-stroke: 1.75;
+  --size-radio: 20px;
+
+  /* Radius */
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --radius-full: 9999px;
+
+  /* Borders */
+  --border-default: 1px solid var(--color-sand);
+  --border-selected: 1.5px solid var(--color-olive);
+  --border-upload: 1.5px dashed var(--color-stone);
+
+  /* Layout: phone artboard width */
+  --app-max: 390px;
+
+  /* Motion */
+  --ease-enter: cubic-bezier(.2, .7, .2, 1);
+  --dur-enter: 320ms;
+  --dur-select: 150ms;
+  --dur-progress: 300ms;
+  --dur-fade: 300ms;
+  --dur-out: 180ms;
+  --enter-shift: 28px;
+  --out-shift: 20px;
+}

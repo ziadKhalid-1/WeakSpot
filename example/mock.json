@@ -1,0 +1,30 @@
+{
+  "_note": "Example mock data for كورة الخميس (invented). Copy to web/src/data/mock.json only if you follow the worked example.",
+  "user": { "name": "عبدالرحمن بن عبدالله بن محمد العبدالكريم", "isCaptain": true },
+  "nextMatch": {
+    "id": "m-0412",
+    "code": "KH-4471-22",
+    "pitchId": "p1",
+    "date": "2026-12-03T21:00:00",
+    "capacity": 14,
+    "price": 120,
+    "players": [
+      { "id": "u1", "name": "عبدالرحمن بن عبدالله بن محمد العبدالكريم", "status": "in" },
+      { "id": "u2", "name": "فيصل العتيبي", "status": "in" },
+      { "id": "u3", "name": "Lina M.", "status": "in" },
+      { "id": "u4", "name": "سلطان", "status": "in" },
+      { "id": "u5", "name": "عبدالعزيز الدوسري", "status": "in" },
+      { "id": "u6", "name": "Omar", "status": "in" },
+      { "id": "u7", "name": "نواف", "status": "in" },
+      { "id": "u8", "name": "تركي الشهري", "status": "in" },
+      { "id": "u9", "name": "ماجد", "status": "in" },
+      { "id": "u10", "name": "خالد القحطاني", "status": "out" }
+    ]
+  },
+  "pitches": [
+    { "id": "p1", "name": "ملعب الحي", "area": "حي النرجس", "pricePerHour": 120, "free": true },
+    { "id": "p2", "name": "ملعب النادي", "area": "حي الملقا", "pricePerHour": 90, "free": true },
+    { "id": "p3", "name": "Pitch Seven", "area": "حي الياسمين", "pricePerHour": 200, "free": false }
+  ],
+  "emptyMatch": null
+}
